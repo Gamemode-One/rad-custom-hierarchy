@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Febucci.HierarchyData
 {
-    public class HierarchyData : ScriptableObject
+    public class HierarchyDataProfile : ScriptableObject
     {
         public bool enabled = true;
         

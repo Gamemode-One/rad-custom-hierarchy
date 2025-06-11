@@ -39,10 +39,10 @@ namespace Febucci.HierarchyData
         
         static class HierarchyRenderer
         {
-            static private HierarchyData.TreeData.BranchGroup currentBranch;
+            static private HierarchyDataProfile.TreeData.BranchGroup currentBranch;
 
-            private static readonly HierarchyData.TreeData.BranchGroup fallbackGroup =
-                new HierarchyData.TreeData.BranchGroup()
+            private static readonly HierarchyDataProfile.TreeData.BranchGroup fallbackGroup =
+                new HierarchyDataProfile.TreeData.BranchGroup()
                 {
                     overlayColor = new Color(1f, 0.44f, 0.97f, .04f),
                     colors = new[]
@@ -158,7 +158,7 @@ namespace Febucci.HierarchyData
         #endregion
 
         private static bool initialized = false;
-        private static HierarchyData data;
+        private static HierarchyDataProfile data;
         private static int firstInstanceID = 0;
         private static List<int> iconsPositions = new List<int>();
         private static Dictionary<int, InstanceInfo> sceneGameObjects = new Dictionary<int, InstanceInfo>();
@@ -227,17 +227,17 @@ namespace Febucci.HierarchyData
         #region Initialization/Helpers
 
         private const string fileName = "HierarchyData";
-        static HierarchyData Load()
+        static HierarchyDataProfile Load()
         {
-            var result = EditorGUIUtility.Load($"Febucci/{fileName}.asset") as HierarchyData;
+            var result = EditorGUIUtility.Load($"Febucci/{fileName}.asset") as HierarchyDataProfile;
             if (result != null)
                 return result;
 
-            var guids = UnityEditor.AssetDatabase.FindAssets("t:" + nameof(HierarchyData));
+            var guids = UnityEditor.AssetDatabase.FindAssets("t:" + nameof(HierarchyDataProfile));
             if (guids.Length == 0)
                 return null;
 
-            return AssetDatabase.LoadAssetAtPath<HierarchyData>(AssetDatabase.GUIDToAssetPath(guids[0]));
+            return AssetDatabase.LoadAssetAtPath<HierarchyDataProfile>(AssetDatabase.GUIDToAssetPath(guids[0]));
         }
 
         /// <summary>
@@ -265,7 +265,7 @@ namespace Febucci.HierarchyData
             try
             {
                 //Creates asset
-                var asset = ScriptableObject.CreateInstance<HierarchyData>();
+                var asset = ScriptableObject.CreateInstance<HierarchyDataProfile>();
                 AssetDatabase.CreateAsset(asset, path + $"/{fileName}.asset");
             }
             catch (Exception e)
