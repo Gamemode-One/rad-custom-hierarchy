@@ -4,6 +4,8 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
+using UnityEngine.ResourceManagement.AsyncOperations;
+
 
 #if UNITY_2021_3_OR_NEWER
 using UnityEditor.SceneManagement;
@@ -230,9 +232,17 @@ namespace Febucci.HierarchyData
 
         static IHierarchyData LoadHierarchyData()
         {
+            IHierarchyData hierarchyData = null;
             var asyncHandle = Addressables.LoadAssetAsync<IHierarchyData>("HierarchyData.asset");
-            IHierarchyData hierarchyData = asyncHandle.WaitForCompletion();
+            Debug.Log(asyncHandle.Status);
 
+            if (asyncHandle.Status != AsyncOperationStatus.Succeeded)
+            {
+                Debug.LogWarning("Could not load HierarchyData.");
+                return null;
+            }
+
+            hierarchyData = asyncHandle.WaitForCompletion();
             return hierarchyData;
         }
 
@@ -256,7 +266,7 @@ namespace Febucci.HierarchyData
 
             initialized = true;
 
-            if (data.Enabled)
+            if (data.HasProfile && data.Enabled)
             {
 
                 #region Registers events

@@ -6,6 +6,8 @@ namespace Febucci.HierarchyData
     [CreateAssetMenu(fileName = "HierarchyDataProfile", menuName = "ScriptableObjects/HierarchyDataProfile")]
     public class HierarchyDataProfile : ScriptableObject, IHierarchyData
     {
+        public bool HasProfile => true;
+
         [SerializeField] private bool enabled = true;
 
         [SerializeField] private bool updateInPlayMode = true;
