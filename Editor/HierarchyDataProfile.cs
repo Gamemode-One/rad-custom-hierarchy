@@ -3,13 +3,14 @@ using UnityEngine;
 
 namespace Febucci.HierarchyData
 {
-    public class HierarchyDataProfile : ScriptableObject
+    [CreateAssetMenu(fileName = "HierarchyDataProfile", menuName = "ScriptableObjects/HierarchyDataProfile")]
+    public class HierarchyDataProfile : ScriptableObject, IHierarchyData
     {
-        public bool enabled = true;
-        
-        public bool updateInPlayMode = true;
+        [SerializeField] private bool enabled = true;
 
-        public bool drawActivationToggle = true;
+        [SerializeField] private bool updateInPlayMode = true;
+
+        [SerializeField] private bool drawActivationToggle = true;
 
         #region Icons Data
 
@@ -27,9 +28,9 @@ namespace Febucci.HierarchyData
             public bool aligned = false;
             public HierarchyElement[] pairs = new HierarchyElement[0];
         }
-        
-        public IconsData icons;
-        
+
+        [SerializeField] private IconsData icons;
+
         #endregion
 
         #region PrefabsData
@@ -49,11 +50,11 @@ namespace Febucci.HierarchyData
             public Prefab[] prefabs = new Prefab[0];
         }
 
-        public PrefabsData prefabsData;
-        
+        [SerializeField] private PrefabsData prefabsData;
+
 
         #endregion
-        
+
         #region Alternating Lines
 
         [System.Serializable]
@@ -63,8 +64,8 @@ namespace Febucci.HierarchyData
             public Color color = new Color(0,0,0, .08f);
         }
 
-        public AlternatingBGData alternatingBackground;
-        
+        [SerializeField] private AlternatingBGData alternatingBackground;
+
         #endregion
 
         #region SeparatorData
@@ -76,8 +77,8 @@ namespace Febucci.HierarchyData
             public string startString = ">";
             public Color color = new Color(0, 1,1, .15f);
         }
-        
-        public SeparatorData separator;
+
+        [SerializeField] private SeparatorData separator;
 
         #endregion
 
@@ -127,8 +128,17 @@ namespace Febucci.HierarchyData
             };
         }
 
-        public TreeData tree;
-        
+        [SerializeField] private TreeData tree;
+
+        public bool Enabled { get => enabled; set => enabled = value; }
+        public bool UpdateInPlayMode { get => updateInPlayMode; set => updateInPlayMode = value; }
+        public bool DrawActivationToggle { get => drawActivationToggle; set => drawActivationToggle = value; }
+        public IconsData Icons { get => icons; set => icons = value; }
+        public PrefabsData PrefabData { get => prefabsData; set => prefabsData = value; }
+        public AlternatingBGData AlternatingBackground { get => alternatingBackground; set => alternatingBackground = value; }
+        public SeparatorData Separator { get => separator; set => separator = value; }
+        public TreeData Tree { get => tree; set => tree = value; }
+
 
         #endregion
 

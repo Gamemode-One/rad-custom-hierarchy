@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.SceneManagement;
+
 #if UNITY_2021_3_OR_NEWER
 using UnityEditor.SceneManagement;
 #else
@@ -54,14 +56,14 @@ namespace Febucci.HierarchyData
             
             public static void SwitchBranchesColors(int hierarchyIndex)
             {
-                int targetIndex = hierarchyIndex % data.tree.branches.Length;
-                if (data.tree.branches.Length == 0 || data.tree.branches[targetIndex].colors.Length<=0)
+                int targetIndex = hierarchyIndex % data.Tree.branches.Length;
+                if (data.Tree.branches.Length == 0 || data.Tree.branches[targetIndex].colors.Length<=0)
                 {
                     currentBranch = fallbackGroup;
                     return;
                 }
                 
-                currentBranch = data.tree.branches[targetIndex];
+                currentBranch = data.Tree.branches[targetIndex];
             }
             
             private const float barWidth = 2;
@@ -158,7 +160,7 @@ namespace Febucci.HierarchyData
         #endregion
 
         private static bool initialized = false;
-        private static HierarchyDataProfile data;
+        private static IHierarchyData data;
         private static int firstInstanceID = 0;
         private static List<int> iconsPositions = new List<int>();
         private static Dictionary<int, InstanceInfo> sceneGameObjects = new Dictionary<int, InstanceInfo>();
@@ -168,41 +170,41 @@ namespace Febucci.HierarchyData
 
         #region Internal
 
-        [MenuItem("Tools/Febucci/Custom Hierarchy/Initialize or Create", priority = 1)]
-        public static void InitializeOrCreate()
-        {
-            if (Load()) //file exists
-            {
-                Initialize();
-                SelectData();
-            }
-            else
-            {
-                //file does not exist; asks the user if they want to create it
-                if (EditorUtility.DisplayDialog("Custom Hierarchy", "Do you want to create an Hierarchy Icon Data?", "Yes", "No"))
-                {
-                    CreateAsset();
-                }
-                else
-                {
-                    Debug.Log("Hierarchy Icon: Data creation was canceled.");
-                }
-            }
-        }
+        //[MenuItem("Tools/Febucci/Custom Hierarchy/Initialize or Create", priority = 1)]
+        //public static void InitializeOrCreate()
+        //{
+        //    if (Load()) //file exists
+        //    {
+        //        Initialize();
+        //        SelectData();
+        //    }
+        //    else
+        //    {
+        //        //file does not exist; asks the user if they want to create it
+        //        if (EditorUtility.DisplayDialog("Custom Hierarchy", "Do you want to create an Hierarchy Icon Data?", "Yes", "No"))
+        //        {
+        //            CreateAsset();
+        //        }
+        //        else
+        //        {
+        //            Debug.Log("Hierarchy Icon: Data creation was canceled.");
+        //        }
+        //    }
+        //}
 
-        static bool SelectData()
-        {
-            var loaded = Load();
-            if (loaded != null)
-            {
-                //EditorUtility.FocusProjectWindow();
-                Selection.activeObject = loaded;
+        //static bool SelectData()
+        //{
+        //    var loaded = Load();
+        //    if (loaded != null)
+        //    {
+        //        //EditorUtility.FocusProjectWindow();
+        //        Selection.activeObject = loaded;
 
-                return true;
-            }
+        //        return true;
+        //    }
 
-            return false;
-        }
+        //    return false;
+        //}
 
         #endregion
 
@@ -226,65 +228,14 @@ namespace Febucci.HierarchyData
 
         #region Initialization/Helpers
 
-        private const string fileName = "HierarchyData";
-        static HierarchyDataProfile Load()
+        static IHierarchyData LoadHierarchyData()
         {
-            var result = EditorGUIUtility.Load($"Febucci/{fileName}.asset") as HierarchyDataProfile;
-            if (result != null)
-                return result;
+            var asyncHandle = Addressables.LoadAssetAsync<IHierarchyData>("HierarchyData.asset");
+            IHierarchyData hierarchyData = asyncHandle.WaitForCompletion();
 
-            var guids = UnityEditor.AssetDatabase.FindAssets("t:" + nameof(HierarchyDataProfile));
-            if (guids.Length == 0)
-                return null;
-
-            return AssetDatabase.LoadAssetAtPath<HierarchyDataProfile>(AssetDatabase.GUIDToAssetPath(guids[0]));
+            return hierarchyData;
         }
 
-        /// <summary>
-        /// Creates the Hierarchy Asset File
-        /// </summary>
-        static void CreateAsset()
-        {
-            if (Load())
-            {
-                Debug.LogWarning("HierarchyIcons: Data already exists, won't create a new one.");
-                return;
-            }
-            
-            //Creates folder
-            if(!AssetDatabase.IsValidFolder("Assets/Editor Default Resources"))
-                AssetDatabase.CreateFolder("Assets", "Editor Default Resources");
-
-            string path = "Assets/Editor Default Resources/Febucci";
-            if (!AssetDatabase.IsValidFolder("Assets/Editor Default Resources/Febucci"))
-            {
-                string guid = AssetDatabase.CreateFolder("Assets/Editor Default Resources", "Febucci");
-                path = AssetDatabase.GUIDToAssetPath(guid);
-            }
-
-            try
-            {
-                //Creates asset
-                var asset = ScriptableObject.CreateInstance<HierarchyDataProfile>();
-                AssetDatabase.CreateAsset(asset, path + $"/{fileName}.asset");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
-
-            AssetDatabase.SaveAssets();
-
-            Initialize();
-            //Focusses new asset
-            SelectData();
-            Debug.Log("Hierarchy Data asset was created in the 'Assets/Editor Default Resources'Febucci' folder.");
-        }
-
-        /// <summary>
-        /// Initializes the script at the beginning. 
-        /// </summary>
         public static void Initialize()
         {
             #region Unregisters previous events
@@ -299,13 +250,13 @@ namespace Febucci.HierarchyData
             #endregion
 
             initialized = false;
-            data = Load();
+            data = LoadHierarchyData();
 
-            if (!data) return; //no data found
+            if (data == null) return; //no data found
 
             initialized = true;
 
-            if (data.enabled)
+            if (data.Enabled)
             {
 
                 #region Registers events
@@ -318,7 +269,7 @@ namespace Febucci.HierarchyData
                 RetrieveDataFromScene();
                 
                 prefabColors.Clear();
-                foreach (var prefab in data.prefabsData.prefabs)
+                foreach (var prefab in data.PrefabData.prefabs)
                 {
                     if (prefab.color.a<=0) continue;
                     if (!prefab.gameObject) continue;
@@ -340,7 +291,7 @@ namespace Febucci.HierarchyData
         /// </summary>
         static void RetrieveDataFromScene()
         {
-            if (!data.updateInPlayMode && Application.isPlaying) //temp. fix for performance reasons while in play mode
+            if (!data.UpdateInPlayMode && Application.isPlaying) //temp. fix for performance reasons while in play mode
                 return;
 
             sceneGameObjects.Clear();
@@ -406,7 +357,7 @@ namespace Febucci.HierarchyData
                 newInfo.topParentHasChild = topParentHasChild;
                 newInfo.goName = go.name;
 
-                if (data.prefabsData.enabled)
+                if (data.PrefabData.enabled)
                 {
                     var prefab = PrefabUtility.GetCorrespondingObjectFromSource(go);
                     if (prefab)
@@ -416,9 +367,9 @@ namespace Febucci.HierarchyData
                 }
 
                 newInfo.isSeparator = String.Compare(go.tag, "EditorOnly", StringComparison.Ordinal) == 0 //gameobject has EditorOnly tag
-                                      && (!string.IsNullOrEmpty(go.name) && !string.IsNullOrEmpty(data.separator.startString) && go.name.StartsWith(data.separator.startString)); //and also starts with '>'
+                                      && (!string.IsNullOrEmpty(go.name) && !string.IsNullOrEmpty(data.Separator.startString) && go.name.StartsWith(data.Separator.startString)); //and also starts with '>'
 
-                if (data.icons.enabled && data.icons.pairs!=null && data.icons.pairs.Length>0)
+                if (data.Icons.enabled && data.Icons.pairs!=null && data.Icons.pairs.Length>0)
                 {
 
                     #region Components Information (icons)
@@ -432,12 +383,12 @@ namespace Febucci.HierarchyData
 
                         componentType = c.GetType();
 
-                        for (int elementIndex = 0; elementIndex < data.icons.pairs.Length; elementIndex++)
+                        for (int elementIndex = 0; elementIndex < data.Icons.pairs.Length; elementIndex++)
                         {
-                            if (!data.icons.pairs[elementIndex].iconToDraw) continue;
+                            if (!data.Icons.pairs[elementIndex].iconToDraw) continue;
 
                             //Class inherithance
-                            foreach (var classReference in data.icons.pairs[elementIndex].targetClasses)
+                            foreach (var classReference in data.Icons.pairs[elementIndex].targetClasses)
                             {
                                 if(!classReference) continue;
                                 
@@ -511,7 +462,7 @@ namespace Febucci.HierarchyData
             }
 
             #region Draw Activation Toggle
-            if (data.drawActivationToggle)
+            if (data.DrawActivationToggle)
             {
                 temp_iconsDrawedCount++;
 
@@ -538,11 +489,11 @@ namespace Febucci.HierarchyData
 
             #region Draw Alternating BG
 
-            if (data.alternatingBackground.enabled)
+            if (data.AlternatingBackground.enabled)
             {
                 if (temp_alternatingDrawed)
                 {
-                    EditorGUI.DrawRect(selectionRect, data.alternatingBackground.color);
+                    EditorGUI.DrawRect(selectionRect, data.AlternatingBackground.color);
                     temp_alternatingDrawed = false;
                 }
                 else
@@ -557,7 +508,7 @@ namespace Febucci.HierarchyData
             #region DrawingPrefabsBackground
 
             drawedPrefabOverlay = false;
-            if (data.prefabsData.enabled && prefabColors.Count>0)
+            if (data.PrefabData.enabled && prefabColors.Count>0)
             {
                 if (prefabColors.ContainsKey(currentItem.prefabInstanceID))
                 {
@@ -571,7 +522,7 @@ namespace Febucci.HierarchyData
             
             #region Drawing Tree
 
-            if (data.tree.enabled
+            if (data.Tree.enabled
                 && currentItem.nestingLevel >= 0)
             {
                 if (selectionRect.x >= 60) //prevents drawing when the hierarchy search mode is enabled 
@@ -579,7 +530,7 @@ namespace Febucci.HierarchyData
                     HierarchyRenderer.SwitchBranchesColors(currentItem.nestingGroup);
 
                     //Group
-                    if ((data.tree.drawOverlayOnColoredPrefabs || !drawedPrefabOverlay) && currentItem.topParentHasChild)
+                    if ((data.Tree.drawOverlayOnColoredPrefabs || !drawedPrefabOverlay) && currentItem.topParentHasChild)
                     {
                         HierarchyRenderer.DrawNestGroupOverlay(selectionRect);
                     }
@@ -587,8 +538,8 @@ namespace Febucci.HierarchyData
 
                     if (currentItem.nestingLevel == 0 && !currentItem.hasChilds)
                     {
-                        HierarchyRenderer.DrawHalfVerticalLineFrom(selectionRect, true, 0, data.tree.baseLevelColor);
-                        HierarchyRenderer.DrawHalfVerticalLineFrom(selectionRect, false, 0, data.tree.baseLevelColor);
+                        HierarchyRenderer.DrawHalfVerticalLineFrom(selectionRect, true, 0, data.Tree.baseLevelColor);
+                        HierarchyRenderer.DrawHalfVerticalLineFrom(selectionRect, false, 0, data.Tree.baseLevelColor);
                     }
                     else
                     {
@@ -607,12 +558,12 @@ namespace Febucci.HierarchyData
                 }
 
                 //draws a super small divider between different groups
-                if (currentItem.nestingLevel == 0 && data.tree.dividerHeigth > 0)
+                if (currentItem.nestingLevel == 0 && data.Tree.dividerHeigth > 0)
                 {
                     Rect boldGroupRect = new Rect(
-                        32, selectionRect.y - data.tree.dividerHeigth / 2f,
+                        32, selectionRect.y - data.Tree.dividerHeigth / 2f,
                         selectionRect.width + (selectionRect.x - 32),
-                        data.tree.dividerHeigth
+                        data.Tree.dividerHeigth
                         );
                     EditorGUI.DrawRect(boldGroupRect, Color.black * .3f);
                 }
@@ -625,18 +576,18 @@ namespace Febucci.HierarchyData
             #region Drawing Separators
             
             //EditorOnly objects are only removed from build if they're not childrens
-            if (data.separator.enabled && data.separator.color.a >0
+            if (data.Separator.enabled && data.Separator.color.a >0
                                        && currentItem.isSeparator && currentItem.nestingLevel == 0)
             {
                 //Adds color on top of the label
-                EditorGUI.DrawRect(selectionRect, data.separator.color);
+                EditorGUI.DrawRect(selectionRect, data.Separator.color);
             }
 
             #endregion
 
             #region Drawing Icon
 
-            if (data.icons.enabled)
+            if (data.Icons.enabled)
             {
                 #region Local Method
 
@@ -644,7 +595,7 @@ namespace Febucci.HierarchyData
                 void DrawIcon(int textureIndex)
                 {
                     //---Icon Alignment---
-                    if (data.icons.aligned)
+                    if (data.Icons.aligned)
                     {
                         //Aligns icon based on texture's position on the array
                         int CalculateIconPosition()
@@ -667,7 +618,7 @@ namespace Febucci.HierarchyData
 
                     GUI.DrawTexture(
                         new Rect(selectionRect.xMax - 16 * (temp_iconsDrawedCount + 1) - 2, selectionRect.yMin, 16, 16),
-                        data.icons.pairs[textureIndex].iconToDraw
+                        data.Icons.pairs[textureIndex].iconToDraw
                         );
                 }
 
