@@ -232,17 +232,26 @@ namespace Febucci.HierarchyData
 
         static IHierarchyData LoadHierarchyData()
         {
-            IHierarchyData hierarchyData = null;
-            var asyncHandle = Addressables.LoadAssetAsync<IHierarchyData>("HierarchyData.asset");
-            Debug.Log(asyncHandle.Status);
+            IHasHierarchyData globalTuner;
+            
+            var asyncHandle = Addressables.LoadAssetAsync<IHasHierarchyData>("GlobalTuner.asset");
+            //Debug.Log(asyncHandle.Status);
 
             if (asyncHandle.Status != AsyncOperationStatus.Succeeded)
+            {
+                Debug.LogWarning("Could not load GlobalTuner.");
+                return null;
+            }
+
+            globalTuner = asyncHandle.WaitForCompletion();
+            if (globalTuner.HierarchyData == null)
             {
                 Debug.LogWarning("Could not load HierarchyData.");
                 return null;
             }
+            
+            IHierarchyData hierarchyData = globalTuner.HierarchyData;
 
-            hierarchyData = asyncHandle.WaitForCompletion();
             return hierarchyData;
         }
 
