@@ -38,9 +38,13 @@ namespace Febucci.HierarchyData
     {
         static HierarchyDrawer()
         {
-            Initialize();
+            //Initialize();
+            EditorApplication.delayCall -= HierarchyDrawer.Initialize;
+            EditorApplication.delayCall += HierarchyDrawer.Initialize;
         }
+
         
+
         static class HierarchyRenderer
         {
             static private HierarchyDataProfile.TreeData.BranchGroup currentBranch;
@@ -172,41 +176,11 @@ namespace Febucci.HierarchyData
 
         #region Internal
 
-        //[MenuItem("Tools/Febucci/Custom Hierarchy/Initialize or Create", priority = 1)]
-        //public static void InitializeOrCreate()
-        //{
-        //    if (Load()) //file exists
-        //    {
-        //        Initialize();
-        //        SelectData();
-        //    }
-        //    else
-        //    {
-        //        //file does not exist; asks the user if they want to create it
-        //        if (EditorUtility.DisplayDialog("Custom Hierarchy", "Do you want to create an Hierarchy Icon Data?", "Yes", "No"))
-        //        {
-        //            CreateAsset();
-        //        }
-        //        else
-        //        {
-        //            Debug.Log("Hierarchy Icon: Data creation was canceled.");
-        //        }
-        //    }
-        //}
-
-        //static bool SelectData()
-        //{
-        //    var loaded = Load();
-        //    if (loaded != null)
-        //    {
-        //        //EditorUtility.FocusProjectWindow();
-        //        Selection.activeObject = loaded;
-
-        //        return true;
-        //    }
-
-        //    return false;
-        //}
+        [MenuItem("Tools/Custom Hierarchy/Wake Up", priority = 1)]
+        public static void WakeUpHierarchyDrawer()
+        {
+            HierarchyDrawer.Initialize();
+        }
 
         #endregion
 
@@ -237,7 +211,8 @@ namespace Febucci.HierarchyData
             var asyncHandle = Addressables.LoadAssetAsync<IHasHierarchyData>("GlobalTuner.asset");
             //Debug.Log(asyncHandle.Status);
 
-            if (asyncHandle.Status != AsyncOperationStatus.Succeeded)
+
+            if (asyncHandle.Status == AsyncOperationStatus.Failed)
             {
                 Debug.LogWarning("Could not load GlobalTuner.");
                 return null;
@@ -254,6 +229,7 @@ namespace Febucci.HierarchyData
 
             return hierarchyData;
         }
+
 
         public static void Initialize()
         {

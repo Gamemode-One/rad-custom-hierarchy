@@ -143,10 +143,5 @@ namespace Febucci.HierarchyData
 
 
         #endregion
-
-        private void OnValidate()
-        {
-            HierarchyDrawer.Initialize();
-        }
     }
 }

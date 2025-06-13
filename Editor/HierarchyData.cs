@@ -1,3 +1,4 @@
+using UnityEditor;
 using UnityEngine;
 
 namespace Febucci.HierarchyData
@@ -16,10 +17,5 @@ namespace Febucci.HierarchyData
         public HierarchyDataProfile.AlternatingBGData AlternatingBackground { get => profile.AlternatingBackground; set => profile.AlternatingBackground = value; }
         public HierarchyDataProfile.SeparatorData Separator { get => profile.Separator; set => profile.Separator = value; }
         public HierarchyDataProfile.TreeData Tree { get => profile.Tree; set => profile.Tree = value; }
-
-        private void OnValidate()
-        {
-            HierarchyDrawer.Initialize();
-        }
     }
 }
