@@ -7,10 +7,8 @@ using UnityEngine.SceneManagement;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
 
-#if UNITY_2021_3_OR_NEWER
+#if UNITY_EDITOR
 using UnityEditor.SceneManagement;
-#else
-using UnityEditor.Experimental.SceneManagement;
 #endif
 
 namespace Febucci.HierarchyData
@@ -33,9 +31,12 @@ namespace Febucci.HierarchyData
     // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     // 
     // For any other use, please ask for permission by contacting the author.
+#if UNITY_EDITOR
     [InitializeOnLoad]
+#endif
     public static class HierarchyDrawer
     {
+#if UNITY_EDITOR
         static HierarchyDrawer()
         {
             //Initialize();
@@ -651,5 +652,7 @@ namespace Febucci.HierarchyData
         }
 
         #endregion
+#endif
     }
+
 }

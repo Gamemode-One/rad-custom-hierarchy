@@ -6,6 +6,7 @@ namespace Febucci.HierarchyData
     [CreateAssetMenu(fileName = "HierarchyDataProfile", menuName = "ScriptableObjects/HierarchyDataProfile")]
     public class HierarchyDataProfile : ScriptableObject, IHierarchyData
     {
+
         public bool HasProfile => true;
 
         [SerializeField] private bool enabled = true;
@@ -14,6 +15,10 @@ namespace Febucci.HierarchyData
 
         [SerializeField] private bool drawActivationToggle = true;
 
+        public bool Enabled { get => enabled; set => enabled = value; }
+        public bool UpdateInPlayMode { get => updateInPlayMode; set => updateInPlayMode = value; }
+        public bool DrawActivationToggle { get => drawActivationToggle; set => drawActivationToggle = value; }
+#if UNITY_EDITOR
         #region Icons Data
 
         [System.Serializable]
@@ -132,9 +137,7 @@ namespace Febucci.HierarchyData
 
         [SerializeField] private TreeData tree;
 
-        public bool Enabled { get => enabled; set => enabled = value; }
-        public bool UpdateInPlayMode { get => updateInPlayMode; set => updateInPlayMode = value; }
-        public bool DrawActivationToggle { get => drawActivationToggle; set => drawActivationToggle = value; }
+        
         public IconsData Icons { get => icons; set => icons = value; }
         public PrefabsData PrefabData { get => prefabsData; set => prefabsData = value; }
         public AlternatingBGData AlternatingBackground { get => alternatingBackground; set => alternatingBackground = value; }
@@ -143,5 +146,6 @@ namespace Febucci.HierarchyData
 
 
         #endregion
+#endif
     }
 }
