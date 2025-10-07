@@ -183,6 +183,24 @@ namespace Febucci.HierarchyData
             HierarchyDrawer.Initialize();
         }
 
+        [MenuItem("Tools/Custom Hierarchy/Use Selected Profile", priority = 2)]
+        public static void UseSelectedProfile()
+        {
+            UnityEngine.Object activeObject = Selection.activeObject;
+            if (activeObject is HierarchyDataProfile selectedProfile)
+            {
+                string assetPath = AssetDatabase.GetAssetPath(selectedProfile);
+                string guid = AssetDatabase.AssetPathToGUID(assetPath);
+                LocalSerializedData.SetHierarchyProfileGUID(guid);
+                
+                Debug.Log($"You are now using {activeObject.name}.");
+            }
+            else
+            {
+                Debug.LogWarning("Selected object is not a HierarchyDataProfile.");
+            }
+        }
+
         #endregion
 
         #region Blog
@@ -207,28 +225,11 @@ namespace Febucci.HierarchyData
 
         static IHierarchyData LoadHierarchyData()
         {
-            IHasHierarchyData globalTuner;
-            
-            var asyncHandle = Addressables.LoadAssetAsync<IHasHierarchyData>("GlobalTuner.asset");
-            //Debug.Log(asyncHandle.Status);
+            string guid = LocalSerializedData.GetHierarchyProfileGUID();
+            string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+            HierarchyDataProfile profile = AssetDatabase.LoadAssetAtPath<HierarchyDataProfile>(assetPath);
 
-
-            if (asyncHandle.Status == AsyncOperationStatus.Failed)
-            {
-                Debug.LogWarning("Could not load GlobalTuner.");
-                return null;
-            }
-
-            globalTuner = asyncHandle.WaitForCompletion();
-            if (globalTuner.HierarchyData == null)
-            {
-                Debug.LogWarning("Could not load HierarchyData.");
-                return null;
-            }
-            
-            IHierarchyData hierarchyData = globalTuner.HierarchyData;
-
-            return hierarchyData;
+            return profile;
         }
 
 
