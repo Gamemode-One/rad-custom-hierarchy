@@ -193,6 +193,8 @@ namespace Febucci.HierarchyData
                 string guid = AssetDatabase.AssetPathToGUID(assetPath);
                 LocalSerializedData.SetHierarchyProfileGUID(guid);
                 
+                HierarchyDrawer.Initialize();
+
                 Debug.Log($"You are now using {activeObject.name}.");
             }
             else
